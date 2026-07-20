@@ -4,10 +4,12 @@
 
 #pragma once
 
+#include "Shared.h"
+
 #include <cmath>
 #include <iostream>
 
-class vec3;
+struct vec3;
 
 using point3 = vec3;
 
@@ -58,6 +60,14 @@ struct vec3 {
     double length_squared() const {
         return (x * x) + (y * y) + (z * z);
     }
+
+    static vec3 random() {
+        return vec3(randomDouble(), randomDouble(), randomDouble());
+    }
+
+    static vec3 random(double min, double max) {
+        return vec3(randomDouble(min, max), randomDouble(min, max), randomDouble(min, max));
+    }
 };
 
 inline std::ostream& operator<<(std::ostream& out, const vec3& v) {
@@ -100,4 +110,23 @@ inline vec3 cross(const vec3& u, const vec3& v) {
 
 inline vec3 unit(const vec3& v) {
     return v / v.length();
+}
+
+inline vec3 randomUnit() {
+    while (true) {
+        auto p = vec3::random(-1, 1);
+        auto lensq = p.length_squared();
+        if (1e-160 < lensq && lensq <= 1)
+            return p / sqrt(lensq);
+    }
+}
+
+inline vec3 randomOnHemisphere(const vec3& normal) {
+    vec3 on_unit_sphere = randomUnit();
+
+    if (dot(on_unit_sphere, normal) > 0.0) {
+        return on_unit_sphere;
+    } else {
+        return -on_unit_sphere;
+    }
 }
