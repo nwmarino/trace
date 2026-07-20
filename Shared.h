@@ -28,3 +28,10 @@ inline double randomDouble() {
 inline double randomDouble(double min, double max) {
     return min + (max - min) * randomDouble();
 }
+
+inline double linearToGamma(double linear) {
+    if (linear > 0)
+        return std::sqrt(linear);
+
+    return 0;
+}

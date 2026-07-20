@@ -84,8 +84,8 @@ private:
         
         HitRecord rec = {};
 
-        if (world.hit(r, Interval(0, +inf), rec)) {
-            vec3 dir = randomOnHemisphere(rec.normal);
+        if (world.hit(r, Interval(0.001, +inf), rec)) {
+            vec3 dir = rec.normal + randomUnit();
             return 0.5 * getRayColor(Ray(rec.p, dir), depth - 1, world);
         }
 
