@@ -10,6 +10,7 @@
 #include "Vec.h"
 #include "Interval.h"
 #include "Writer.h"
+#include "Material.h"
 
 class Camera {
 public:
@@ -85,8 +86,13 @@ private:
         HitRecord rec = {};
 
         if (world.hit(r, Interval(0.001, +inf), rec)) {
-            vec3 dir = rec.normal + randomUnit();
-            return 0.5 * getRayColor(Ray(rec.p, dir), depth - 1, world);
+            Ray scattered = {};
+            Color attenuation = {};
+
+            if (rec.mat->scatter(r, rec, attenuation, scattered))
+                return attenuation * getRayColor(scattered, depth - 1, world);
+
+            return Color(0, 0, 0);
         }
 
         vec3 unit_dir = unit(r.dir);

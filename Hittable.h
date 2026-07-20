@@ -11,9 +11,12 @@
 #include <memory>
 #include <vector>
 
+class Material;
+
 struct HitRecord {
     point3 p = {};
     vec3 normal = {};
+    std::shared_ptr<Material> mat = nullptr;
     double t = 0.0;
     bool front_face = false;
 

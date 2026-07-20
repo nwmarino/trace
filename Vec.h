@@ -61,6 +61,11 @@ struct vec3 {
         return (x * x) + (y * y) + (z * z);
     }
 
+    bool near_zero() const {
+        auto s = 1e-8;
+        return (std::fabs(x) < s) && (std::fabs(y) < s) && (std::fabs(z) < s);
+    }
+
     static vec3 random() {
         return vec3(randomDouble(), randomDouble(), randomDouble());
     }
@@ -129,4 +134,8 @@ inline vec3 randomOnHemisphere(const vec3& normal) {
     } else {
         return -on_unit_sphere;
     }
+}
+
+inline vec3 reflect(const vec3& v, const vec3& n) {
+    return v - 2 * dot(v, n) * n;
 }
