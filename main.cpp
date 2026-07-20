@@ -4,6 +4,9 @@
 
 #include "Ray.h"
 #include "Vec.h"
+#include "Hittable.h"
+#include "Sphere.h"
+#include "Shared.h"
 
 #include <iostream>
 
@@ -17,26 +20,10 @@ void writeColor(std::ostream& out, const color& px) {
     out << r_byte << ' ' << g_byte << ' ' << b_byte << '\n';
 }
 
-double hit_sphere(const point3& center, double radius, const Ray& r) {
-    vec3 oc = center - r.origin;
-    double a = r.dir.length_squared();
-    double h = dot(r.dir, oc);
-    double c = oc.length_squared() - (radius * radius);
-    double discriminant = (h * h) - (a * c);
-
-    if (discriminant < 0) {
-        return -1.0;
-    } else {
-        return (h - std::sqrt(discriminant)) / a;
-    }
-}
-
-color ray_color(const Ray& r) {
-    auto t = hit_sphere(point3(0, 0, -1), 0.5, r);
-    if (t > 0.0) {
-        vec3 N = unit(r.at(t) - vec3(0, 0, -1));
-        return 0.5 * color(N.x + 1, N.y + 1, N.z + 1);
-    }
+color ray_color(const Ray& r, const Hittable& world) {
+    HitRecord rec = {};
+    if (world.hit(r, 0, INF, rec))
+        return 0.5 * (rec.normal + color(1, 1, 1));
     
     vec3 unit_dir = unit(r.dir);
     auto a = 0.5 * (unit_dir.y + 1.0);
@@ -45,8 +32,12 @@ color ray_color(const Ray& r) {
 
 int32_t main() {
     double aspect = 16.0 / 9.0;
-    int32_t width = 400u;
+    int32_t width = 720u;
     int32_t height = std::max(1, int32_t(width / aspect));
+
+    HittableList world = {};
+    world.add(std::make_shared<Sphere>(point3(0, 0, -1), 0.5));
+    world.add(std::make_shared<Sphere>(point3(0, -100.5, -1), 100));
 
     double focal_length = 1.0;
     double viewport_height = 2.0;
@@ -72,7 +63,7 @@ int32_t main() {
             auto ray_dir = pixel_center - camera_center;
             Ray r(camera_center, ray_dir);
 
-            color pixel_color = ray_color(r);
+            color pixel_color = ray_color(r, world);
             writeColor(std::cout, pixel_color);
         }
     }

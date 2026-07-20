@@ -1,0 +1,42 @@
+//
+//  Sphere.h
+//
+
+#pragma once
+
+#include "Hittable.h"
+
+class Sphere : public Hittable {
+    point3 center = {};
+    double radius = {};
+
+public:
+    Sphere(const point3& center, double radius) 
+        : center(center)
+        , radius(std::fmax(0, radius)) {}
+
+    bool hit(const Ray& r, double ray_tmin, double ray_tmax, HitRecord& rec) const override {
+        vec3 oc = center - r.origin;
+        double a = r.dir.length_squared();
+        double h = dot(r.dir, oc);
+        double c = oc.length_squared() - (radius * radius);
+
+        double discriminant = (h * h) - (a * c);
+        if (discriminant < 0)
+            return false;
+
+        double sqrtd = std::sqrt(discriminant);
+        double root = (h - sqrtd) / a;
+
+        if (root <= ray_tmin || ray_tmax <= root) {
+            root = (h + sqrtd) / a;
+            if (root <= ray_tmin || ray_tmax <= root)
+                return false;
+        }
+
+        rec.t = root;
+        rec.p = r.at(rec.t);
+        rec.setFaceNormal(r, (rec.p - center) / radius);
+        return true;
+    }
+};
