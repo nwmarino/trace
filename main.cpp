@@ -22,9 +22,9 @@ void writeColor(std::ostream& out, const color& px) {
 
 color ray_color(const Ray& r, const Hittable& world) {
     HitRecord rec = {};
-    if (world.hit(r, 0, INF, rec))
+    if (world.hit(r, Interval(0, +inf), rec))
         return 0.5 * (rec.normal + color(1, 1, 1));
-    
+
     vec3 unit_dir = unit(r.dir);
     auto a = 0.5 * (unit_dir.y + 1.0);
     return (1.0 - a) * color(1.0, 1.0, 1.0) + a * color(0.5, 0.7, 1.0);

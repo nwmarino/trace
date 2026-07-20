@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include "Interval.h"
 #include "Ray.h"
 #include "Vec.h"
 
@@ -26,7 +27,7 @@ class Hittable {
 public:
     virtual ~Hittable() = default;
 
-    virtual bool hit(const Ray& r, double ray_tmin, double ray_tmax, HitRecord& rec) const = 0;
+    virtual bool hit(const Ray& r, Interval ray_t, HitRecord& rec) const = 0;
 };
 
 class HittableList : public Hittable {
@@ -47,13 +48,13 @@ public:
         objects.push_back(object);
     }
 
-    bool hit(const Ray& r, double ray_tmin, double ray_tmax, HitRecord& rec) const override {
+    bool hit(const Ray& r, Interval ray_t, HitRecord& rec) const override {
         HitRecord temp = {};
         bool result = false;
-        auto closest = ray_tmax;
+        auto closest = ray_t.max;
 
         for (const auto& object : objects) {
-            if (object->hit(r, ray_tmin, closest, temp)) {
+            if (object->hit(r, Interval(ray_t.min, closest), temp)) {
                 result = true;
                 closest = temp.t;
                 rec = temp;
