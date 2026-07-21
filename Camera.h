@@ -22,6 +22,8 @@ public:
     point3 lookFrom = point3(0, 0, 0);
     point3 lookAt = point3(0, 0, -1);
     vec3 vup = vec3(0, 1, 0);
+    double defocus_angle = 0;
+    double focus_dist = 10;
 
 private:
     int32_t image_height = 0;
@@ -33,6 +35,8 @@ private:
     vec3 u = {};
     vec3 v = {};
     vec3 w = {};
+    vec3 defocus_disk_u = {};
+    vec3 defocus_disk_v = {};
 
 public:
     void render(const Hittable& world) {
@@ -67,10 +71,9 @@ private:
 
         center = lookFrom;
 
-        double focal_length = (lookFrom - lookAt).length();
         double theta = toRadians(vfov);
         double h = std::tan(theta / 2);
-        double viewport_height = 2.0 * h * focal_length;
+        double viewport_height = 2.0 * h * focus_dist;
         double viewport_width = viewport_height * (double(image_width) / image_height);
 
         w = unit(lookFrom - lookAt);
@@ -83,15 +86,27 @@ private:
         pixel_du = viewport_u / image_width;
         pixel_dv = viewport_v / image_height;
 
-        vec3 viewport_upper_left = center - (focal_length * w) - viewport_u / 2 - viewport_v / 2;
+        vec3 viewport_upper_left = center - (focus_dist * w) - viewport_u / 2 - viewport_v / 2;
         px00 = viewport_upper_left + 0.5 * (pixel_du + pixel_dv);
+
+        auto defocus_radius = focus_dist * std::tan(toRadians(defocus_angle / 2));
+        defocus_disk_u = u * defocus_radius;
+        defocus_disk_v = v * defocus_radius;
     }
 
     Ray getRay(int32_t i, int32_t j) const {
         vec3 offset = sampleSquare();
         vec3 sample = px00 + ((i + offset.x) * pixel_du) + ((j + offset.y) * pixel_dv);
 
-        return Ray(center, sample - center);
+        vec3 origin = (defocus_angle <= 0) ? center : defocusDiskSample();
+        vec3 dir = sample - origin;
+
+        return Ray(origin, dir);
+    }
+
+    point3 defocusDiskSample() const {
+        auto p = randomInUnitDisk();
+        return center + (p.x * defocus_disk_u) + (p.y * defocus_disk_v);
     }
 
     Color getRayColor(const Ray& r, int32_t depth, const Hittable& world) const {

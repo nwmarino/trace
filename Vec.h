@@ -126,6 +126,14 @@ inline vec3 randomUnit() {
     }
 }
 
+inline vec3 randomInUnitDisk() {
+    while (true) {
+        auto p = vec3(randomDouble(-1, 1), randomDouble(-1, 1), 0);
+        if (p.length_squared() < 1)
+            return p;
+    }
+}
+
 inline vec3 randomOnHemisphere(const vec3& normal) {
     vec3 on_unit_sphere = randomUnit();
 
